@@ -39,6 +39,22 @@ Targets from Kali:
 
 Take a VM snapshot of both before you start, so you can roll back after destructive tests.
 
+Shortcut for the host side: double-click `start_lab_for_kali.bat`. It starts both builds on the
+VirtualBox host-only address (so the baseline is not exposed to your Wi-Fi), checks they answer,
+and opens both `demo_credentials.txt` files.
+
+### 0.1 One-command run (the kit)
+
+`vapt/kali/kali_vapt.py` runs the CLI parts of sections 2-5 against both builds, plus the
+detection check, and writes a baseline-vs-hardened `summary.md` and a `.tar.gz` of all evidence:
+
+```bash
+python3 safehealth/vapt/kali/kali_vapt.py --baseline http://192.168.56.10:5444 --hardened https://192.168.56.10:5443
+```
+
+See `vapt/kali/README.md`. Still take the Burp and dashboard screenshots by hand (section 4):
+the kit's logs are the evidence for the CLI tools, Burp needs the GUI.
+
 ## 1. Mapping to the proposal (section 8.5)
 
 | Area | Tool | Run against |
@@ -73,11 +89,19 @@ Log in once in the browser, copy the `Cookie` header, then:
 sqlmap -u "http://192.168.56.10:5444/login" --data="username=x&password=x" \
        --batch --risk=3 --level=5 --dump -T users
 
-# Baseline search (expect: UNION injection)
-sqlmap -u "http://192.168.56.10:5444/patients/?q=x" --cookie="sh_session=PASTE" --batch --dbs
+# Baseline search (expect: UNION injection). Log in as the RECEPTIONIST (ravi): the baseline
+# only builds the search SQL by string formatting for that role; doctors use a safe query.
+sqlmap -u "http://192.168.56.10:5444/patients/?q=x" --cookie="sh_session=PASTE" --batch --tables
 
-# Hardened, same two targets (expect: not injectable)
-sqlmap -u "https://192.168.56.10:5443/login" --data="username=x&password=x" --batch --risk=3 --level=5
+# Hardened login (expect: not injectable). Without --csrf-token every request is refused with 400,
+# and without --delay the 10-per-minute login limit answers 429 - either would make
+# "not injectable" meaningless. The cookie on this build is __Host-sh_session.
+sqlmap -u "https://192.168.56.10:5443/login" --data="csrf_token=x&username=x&password=x" -p username \
+       --csrf-token=csrf_token --csrf-url="https://192.168.56.10:5443/login" --delay=7 --batch
+
+# Hardened search as ravi (expect: not injectable). Paste the __Host-sh_session value.
+sqlmap -u "https://192.168.56.10:5443/patients/?q=x" -p q --cookie="__Host-sh_session=PASTE" \
+       --delay=0.25 --level=2 --batch
 ```
 **Screenshot:** on the baseline, the dumped `users` table and "parameter is injectable"; on the
 hardened build, "all tested parameters do not appear to be injectable".
@@ -97,20 +121,25 @@ Set Kali's browser proxy to Burp (127.0.0.1:8080), import Burp's CA for the HTTP
 - **Sessions.** Compare the `Set-Cookie` on each build (Proxy > HTTP history). Log out and replay an
   old cookie in Repeater. Baseline: still works. Hardened: redirected to login.
 
-> Burp Community limits Intruder speed. For heavier brute-force use ZAP's fuzzer or `hydra`:
+> Burp Community limits Intruder speed. On the **baseline** (no CSRF, no lockout) `hydra` works:
 > ```bash
-> hydra -l anita -P rockyou-top100.txt 192.168.56.10 http-post-form \
->   "/login:csrf_token=^CSRF^&username=^USER^&password=^PASS^:Invalid"
+> hydra -l anita -P rockyou-top100.txt -s 5444 192.168.56.10 http-post-form \
+>   "/login:username=^USER^&password=^PASS^:F=Wrong password"
 > ```
-> (The hardened build needs a fresh CSRF token per request, which is itself a finding to note.)
+> hydra cannot fetch a fresh CSRF token per request, so against the **hardened** build it only
+> sees 400s. Use Burp Intruder with a macro/session rule that reloads `/login` for the token, or
+> the kit's built-in brute-force test (section 0.1). That the CSRF token defeats naive guessing
+> tools is itself a finding to note.
 
 ## 5. OWASP ZAP — headers and automated scan
 
 ```bash
-# Baseline
-zap-cli quick-scan --self-contained http://192.168.56.10:5444
+# zap-cli is retired; ZAP's own command-line quick scan (spider + active scan + HTML report):
+zaproxy -cmd -quickurl http://192.168.56.10:5444 -quickout ~/zap_baseline.html -quickprogress
+zaproxy -cmd -quickurl https://192.168.56.10:5443 -quickout ~/zap_hardened.html -quickprogress
 # or use the ZAP desktop: Automated Scan on each target
 nikto -h http://192.168.56.10:5444
+nikto -h https://192.168.56.10:5443
 ```
 **Screenshot:** ZAP Alerts panel for each build. Expected on the baseline: missing CSP,
 missing anti-clickjacking header, cookie without HttpOnly/Secure. Hardened: these are gone.
