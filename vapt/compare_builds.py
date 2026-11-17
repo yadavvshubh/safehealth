@@ -97,6 +97,9 @@ class Lab:
     def login(self, username):
         """Full login. Completes TOTP when the build asks for it (waits out the replay window if needed)."""
         c, r = self.password_step(username)
+        if r.status == 429:                       # hardened login rate limit (10/min/IP): wait it out once
+            time.sleep(61)
+            c, r = self.password_step(username)
         if r.status != 302:
             raise RuntimeError(f"login for {username} failed ({r.status})")
         loc = r.headers["Location"]

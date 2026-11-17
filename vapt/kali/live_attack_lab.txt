@@ -1,0 +1,70 @@
+PASS  [Access] anonymous GET / -> login  (302)
+PASS  [Access] anonymous GET /patients/1 -> login  (302)
+PASS  [Access] anonymous GET /security/ -> login  (302)
+PASS  [Access] anonymous GET /admin/users -> login  (302)
+PASS  [Access] anonymous GET /security/api/summary -> login  (302)
+PASS  [Auth] correct password alone does not grant access
+PASS  [Auth] doctor logs in with password + TOTP (first-login enrolment)
+PASS  [RBAC] doctor sees diagnosis and prescriptions of assigned patient
+PASS  [Auth] TOTP code cannot be replayed
+PASS  [Auth] wrong TOTP code rejected
+PASS  [SQLi] login payload rejected: "' OR '1'='1' -- "
+PASS  [SQLi] login payload rejected: "admin'--"
+PASS  [SQLi] login payload rejected: "' UNION SELECT username,password_hash FROM users--"
+PASS  [SQLi] login payload rejected: "'; DROP TABLE patients;--"
+PASS  [SQLi] login payload rejected: "' OR SLEEP(5)--"
+PASS  [SQLi] login payload rejected: '" OR ""="'
+PASS  [SQLi] login payload rejected: "meera' AND 1=1--"
+PASS  [SQLi] no time-based injection (max login response)  (0.12s)
+PASS  [SQLi] search payload harmless: "' OR 1=1 --"
+PASS  [SQLi] search payload harmless: "%' UNION SELECT password_hash,2,3,4 FROM users --"
+PASS  [SQLi] search payload harmless: "x'; DROP TABLE patients; --"
+PASS  [SQLi] database intact after injection attempts
+PASS  [RBAC] receptionist GET /security/ -> 403
+PASS  [RBAC] receptionist GET /admin/users -> 403
+PASS  [RBAC] receptionist POST /patients/1/clinical -> 403
+PASS  [RBAC] receptionist cannot see diagnosis/allergies
+PASS  [RBAC] nurse sees diagnosis but not history/prescriptions
+PASS  [RBAC] nurse cannot add prescriptions
+PASS  [RBAC] admin cannot open patient records
+PASS  [IDOR] doctor can open own patient
+PASS  [IDOR] doctor changing patient ID in URL gets 403 (5 tries)  ([403, 403, 403, 403, 403])
+PASS  [IDOR] non-existent ID gives same 403 (no enumeration)
+PASS  [IDOR] cannot write prescription to someone else's patient
+PASS  [XSS] stored payload in diagnosis/vitals is HTML-encoded
+PASS  [XSS] payload in address field is encoded
+PASS  [XSS] payload in name field rejected by validation
+PASS  [XSS] CSP blocks inline scripts
+PASS  [CSRF] POST without CSRF token -> 400
+PASS  [CSRF] another user's CSRF token rejected
+PASS  [CSRF] forged write did not change data
+PASS  [Session] cookie has __Host- prefix, Secure, HttpOnly, SameSite=Strict  (__Host-sh_session=p2CHGwMHbz2S...)
+PASS  [Session] cookie reused after logout is rejected
+PASS  [Session] session ID changes after password step (no fixation)
+PASS  [Brute force] anita locked after 5 failures
+PASS  [Brute force] anita's live session killed by lockout
+PASS  [Brute force] correct password refused while locked  (401)
+PASS  [Brute force] same error for locked, wrong and unknown user
+PASS  [Headers] X-Frame-Options present  (DENY)
+PASS  [Headers] X-Content-Type-Options present  (nosniff)
+PASS  [Headers] Referrer-Policy present  (no-referrer)
+PASS  [Headers] Cache-Control present  (no-store)
+PASS  [Headers] Strict-Transport-Security present  (max-age=31536000; includeSubDomains)
+PASS  [Headers] server does not reveal stack traces
+PASS  [Hardening] oversized request body refused (413)  (413)
+PASS  [Detection] brute_force alert raised (High)  (5 failed logins for 'anita' within 120 s)
+PASS  [Detection] privilege_violation alert raised (High)  ('ravi' (receptionist) requested /patients/1/clinical which the role forbids (3 time(s) in 10 min))
+PASS  [Detection] repeated_authz_failures alert raised (Medium)  ('arjun' had 7 denied requests within 120 s (possible ID tampering / forced browsing))
+PASS  [Detection] mass_record_access alert raised (High)  ('meera' opened 15 different patient records within 120 s)
+PASS  [Detection] dashboard counts locked account
+PASS  [Audit] hash chain verifies intact after the whole attack run
+PASS  [Audit] 'login.failure' events recorded  (15)
+PASS  [Audit] 'access.denied' events recorded  (12)
+PASS  [Audit] 'patient.view' events recorded  (24)
+PASS  [Audit] 'clinical.update' events recorded  (1)
+PASS  [Audit] 'csrf.failure' events recorded  (2)
+PASS  [Audit] 'logout' events recorded  (1)
+PASS  [Audit] 'login.success' events recorded  (5)
+PASS  [Audit] no plaintext diagnosis in the database file
+
+68/68 checks passed

@@ -74,6 +74,9 @@ def login(username, password):
     c = Client()
     token = c.csrf("/login")
     r = c.post("/login", {"csrf_token": token, "username": username, "password": password})
+    if r.status == 429:                   # login rate limit (10/min/IP) hit by earlier checks: wait it out once
+        time.sleep(61)
+        r = c.post("/login", {"csrf_token": c.csrf("/login"), "username": username, "password": password})
     if r.status != 302:
         return c, r
     loc = r.headers["Location"]
@@ -218,9 +221,10 @@ for i in range(5):
     r = bf.post("/login", {"csrf_token": tok, "username": "anita", "password": f"Guess-{i}-Wrong"})
 check("Brute force", "anita locked after 5 failures", count("SELECT locked_until FROM users WHERE username='anita'") > time.time())
 check("Brute force", "anita's live session killed by lockout", anita.get("/patients/").status == 302)
+time.sleep(61)                            # let the 10/min IP rate limit reset so we test the lockout, not the limiter
 tok = bf.csrf("/login")
 r = bf.post("/login", {"csrf_token": tok, "username": "anita", "password": creds["anita"]})
-check("Brute force", "correct password refused while locked", r.status == 401)
+check("Brute force", "correct password refused while locked", r.status == 401, str(r.status))
 r1 = bf.post("/login", {"csrf_token": bf.csrf("/login"), "username": "anita", "password": "x"})
 r2 = bf.post("/login", {"csrf_token": bf.csrf("/login"), "username": "no_such_user", "password": "x"})
 strip = lambda t: re.sub(r'value="[^"]+"', "", t)

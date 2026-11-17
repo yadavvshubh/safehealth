@@ -1,0 +1,179 @@
+<title>SafeHealth Kali Lab Run</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one reading column; before/after evidence as paired frames; tables scroll inside their own box */
+:root {
+  --bg: #f5f7f8; --surface: #ffffff; --ink: #14212b; --muted: #55656f; --line: #d9e1e5;
+  --accent: #0b6e8a; --bad: #b42318; --bad-bg: #fdecea; --good: #18794e; --good-bg: #e6f4ec;
+  --code-bg: #eef2f4;
+  --sans: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f171c; --surface: #16222a; --ink: #e3eaee; --muted: #93a4ae; --line: #2a3a44;
+  --accent: #4fb3cf; --bad: #ff8a7a; --bad-bg: #3a1d1a; --good: #5fd39a; --good-bg: #15301f; --code-bg: #1c2b34; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f171c; --surface: #16222a; --ink: #e3eaee; --muted: #93a4ae; --line: #2a3a44;
+  --accent: #4fb3cf; --bad: #ff8a7a; --bad-bg: #3a1d1a; --good: #5fd39a; --good-bg: #15301f; --code-bg: #1c2b34; color-scheme: dark }
+body { background: var(--bg); color: var(--ink); font: 16px/1.6 var(--sans);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+main { max-width: 1080px; margin: 0 auto; padding-block: 40px 64px; display: grid; gap: 56px; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 700; }
+h2 { font-size: 1.5rem; font-weight: 600; }
+h3 { font-size: 1.05rem; font-weight: 600; }
+p { margin: 0; max-width: 68ch; }
+section { display: grid; gap: 18px; min-width: 0; }
+.eyebrow { font: 500 .78rem var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--accent); }
+.lede { color: var(--muted); font-size: 1.05rem; }
+code, .mono { font-family: var(--mono); font-size: .88em; }
+code { background: var(--code-bg); padding: 1px 5px; border-radius: 4px; }
+.lab { display: flex; flex-wrap: wrap; gap: 8px 22px; font: .85rem var(--mono); color: var(--muted); }
+.lab b { color: var(--ink); font-weight: 500; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 4px; align-content: start; }
+.tile .num { font: 600 1.9rem var(--mono); font-variant-numeric: tabular-nums; }
+.tile .num.bad { color: var(--bad); } .tile .num.good { color: var(--good); }
+.tile span { color: var(--muted); font-size: .9rem; }
+.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+@media (max-width: 720px) { .pair { grid-template-columns: 1fr; } }
+figure { margin: 0; display: grid; gap: 8px; min-width: 0; }
+figure img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; display: block; }
+figcaption { font-size: .9rem; color: var(--muted); }
+.tag { display: inline-block; font: 600 .72rem var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; margin-right: 6px; vertical-align: 1px; }
+.tag.bad { color: var(--bad); background: var(--bad-bg); } .tag.good { color: var(--good); background: var(--good-bg); }
+.case { display: grid; gap: 12px; padding-top: 18px; border-top: 1px solid var(--line); }
+.scroll { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; font-size: .9rem; }
+th, td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font: 500 .75rem var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+tr:last-child td { border-bottom: 0; }
+td.id { font-family: var(--mono); color: var(--muted); white-space: nowrap; }
+td .ev { display: block; color: var(--muted); font-size: .82rem; margin-top: 2px; }
+.groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.group { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; display: flex; justify-content: space-between; gap: 8px; font-size: .9rem; }
+.group b { font-family: var(--mono); color: var(--good); font-variant-numeric: tabular-nums; }
+.group b.bad { color: var(--bad); }
+pre { margin: 0; padding: 14px 16px; background: var(--code-bg); border-radius: 8px; overflow-x: auto; font: .8rem/1.5 var(--mono); white-space: pre; }
+ul.notes { margin: 0; padding-left: 20px; display: grid; gap: 8px; max-width: 72ch; }
+a { color: var(--accent); }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+</style>
+
+<main>
+  <header style="display:grid;gap:14px">
+    <div class="eyebrow">MCA capstone · VAPT evidence · 17 Nov 2026</div>
+    <h1>SafeHealth attacked from Kali Linux</h1>
+    <p class="lede">The deliberately weak baseline build and the hardened v1.1 build, attacked with the same tests from a Kali VM on an isolated host-only network. Every screenshot below was taken inside the Kali VM.</p>
+    <div class="lab">
+      <div>attacker <b>Kali 2026.1 · 192.168.56.101</b></div>
+      <div>target <b>Windows host · 192.168.56.1</b></div>
+      <div>baseline <b>http :5444</b></div>
+      <div>hardened <b>https :5443</b></div>
+      <div>network <b>VirtualBox host-only, no internet</b></div>
+    </div>
+  </header>
+
+  <section>
+    <div class="tiles">
+      <div class="tile"><div class="num bad">19/19</div><span>attacks succeed on the baseline</span></div>
+      <div class="tile"><div class="num good">0/19</div><span>attacks succeed on the hardened build</span></div>
+      <div class="tile"><div class="num good">68/68</div><span>live security checks pass on the hardened build</span></div>
+      <div class="tile"><div class="num good">138/138</div><span>automated tests pass</span></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">Demo · in the Kali browser</div>
+    <h2>Same attack, both builds</h2>
+
+    <div class="case">
+      <h3>SQL injection on the login form</h3>
+      <p>Username <code>' OR '1'='1' -- </code>, any password.</p>
+      <div class="pair">
+        <figure><img src="screens/02_baseline_sqli_logged_in.png" alt="Baseline: logged in as Mr. Sharma, admin, with no password" loading="lazy"><figcaption><span class="tag bad">Baseline</span>Logged in as the admin, Mr. Sharma, without a password.</figcaption></figure>
+        <figure><img src="screens/04_hardened_sqli_blocked.png" alt="Hardened: generic invalid username or password message" loading="lazy"><figcaption><span class="tag good">Hardened</span>Parameterised SQL. One generic error, nothing about the database.</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="case">
+      <h3>Stored cross-site scripting in a diagnosis</h3>
+      <p>Diagnosis saved as <code>&lt;script&gt;alert('sh-xss')&lt;/script&gt;</code>, then the patient page is opened by a doctor.</p>
+      <div class="pair">
+        <figure><img src="screens/05_baseline_xss_alert.png" alt="Baseline: browser alert sh-xss fires" loading="lazy"><figcaption><span class="tag bad">Baseline</span>The script runs in the doctor's browser.</figcaption></figure>
+        <figure><img src="screens/08_hardened_xss_as_text.png" alt="Hardened: script shown as plain text in the diagnosis box" loading="lazy"><figcaption><span class="tag good">Hardened</span>Shown as text. Output is escaped and the CSP blocks inline scripts.</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="case">
+      <h3>UNION injection in patient search, and IDOR</h3>
+      <p>Search <code>%' UNION SELECT id, username, password_hash, role FROM users -- </code> as the receptionist; a doctor changes the patient ID in the URL.</p>
+      <div class="pair">
+        <figure><img src="screens/06_baseline_union_hashes.png" alt="Baseline: staff usernames, password hashes and roles listed among patients" loading="lazy"><figcaption><span class="tag bad">Baseline</span>Every staff account's unsalted SHA-256 hash is listed as if it were a patient.</figcaption></figure>
+        <figure><img src="screens/09_hardened_idor_403.png" alt="Hardened: 403 page, attempt logged" loading="lazy"><figcaption><span class="tag good">Hardened</span>Patient 5 is not Dr. Meera's: 403 and the attempt is logged. The UNION search returns no data (check F02 below).</figcaption></figure>
+      </div>
+    </div>
+
+    <div class="case">
+      <h3>Second factor and detection</h3>
+      <div class="pair">
+        <figure><img src="screens/07_hardened_mfa_prompt.png" alt="Hardened: verification code step after the password" loading="lazy"><figcaption><span class="tag good">Hardened</span>The right password only gets to step 2. A TOTP code is required for every staff account.</figcaption></figure>
+        <figure><img src="screens/11_hardened_security_dashboard.png" alt="Hardened: security dashboard with brute force, privilege violation and suspicious login alerts" loading="lazy"><figcaption><span class="tag good">Hardened</span>The attacks raised alerts: brute force on <code>anita</code> (account locked, sessions ended), receptionist privilege violation, and a login from Kali's new IP.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="eyebrow">vapt/compare_builds.py · over the lab network</div>
+    <h2>19 paired attacks</h2>
+    <p class="lede">Each check is run against both builds. Results load from <code>results_baseline_lab.json</code> and <code>results_hardened_lab.json</code>.</p>
+    <div class="scroll"><table id="cmp"><thead><tr><th>ID</th><th>Attack</th><th>Baseline</th><th>Hardened</th></tr></thead><tbody><tr><td colspan="4">Loading results…</td></tr></tbody></table></div>
+  </section>
+
+  <section>
+    <div class="eyebrow">vapt/live_attack.py · hardened build</div>
+    <h2>68 live checks</h2>
+    <p class="lede" id="live-sum">Loading…</p>
+    <div class="groups" id="live"></div>
+  </section>
+
+  <!--KALI-->
+
+  <!--DRILL-->
+
+  <section>
+    <div class="eyebrow">Notes for the report</div>
+    <h2>What to know about this run</h2>
+    <ul class="notes">
+      <li>The hardened build's login limit (10 per minute per IP) stopped the test scripts' own logins. The scripts now wait out the limit and retry once. No application code changed.</li>
+      <li>Checks F05 and F06 were answered by that rate limit (HTTP 429) before the account lockout. <code>live_attack.py</code> tests the lockout itself and gets the 401 lockout response.</li>
+      <li>OWASP ZAP is not installed on the Kali VM and the lab has no internet, so nikto covers the header and configuration scan.</li>
+      <li>The browser demo was driven in Firefox on Kali. Burp Suite screenshots are still yours to take if your guide wants them.</li>
+    </ul>
+  </section>
+</main>
+
+<script>
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const tag = s => s === "VULNERABLE" ? '<span class="tag bad">Vulnerable</span>' : s === "BLOCKED" ? '<span class="tag good">Blocked</span>' : '<span class="tag bad">' + esc(s) + '</span>';
+Promise.all(["results_baseline_lab.json", "results_hardened_lab.json"].map(u => fetch(u).then(r => r.json())))
+  .then(([b, h]) => {
+    document.querySelector("#cmp tbody").innerHTML = b.results.map((r, i) => {
+      const x = h.results[i];
+      return `<tr><td class="id">${esc(r.id)}</td><td>${esc(r.title)}<span class="ev">${esc(r.area)}</span></td>` +
+        `<td>${tag(r.status)}<span class="ev">${esc(r.evidence)}</span></td><td>${tag(x.status)}<span class="ev">${esc(x.evidence)}</span></td></tr>`;
+    }).join("");
+  })
+  .catch(() => { document.querySelector("#cmp tbody").innerHTML = '<tr><td colspan="4">Could not load the result files.</td></tr>'; });
+fetch("live_attack_lab.txt").then(r => r.text()).then(t => {
+  const groups = {}; let pass = 0, total = 0;
+  for (const m of t.matchAll(/^(PASS|FAIL)\s+\[([^\]]+)\]/gm)) {
+    const g = groups[m[2]] ||= { p: 0, n: 0 }; g.n++; total++;
+    if (m[1] === "PASS") { g.p++; pass++; }
+  }
+  document.getElementById("live-sum").textContent = `${pass} of ${total} checks passed against https://192.168.56.1:5443, run from the host over the lab network.`;
+  document.getElementById("live").innerHTML = Object.entries(groups).map(([k, g]) =>
+    `<div class="group"><span>${esc(k)}</span><b class="${g.p === g.n ? "" : "bad"}">${g.p}/${g.n}</b></div>`).join("");
+}).catch(() => { document.getElementById("live-sum").textContent = "Could not load the live check results."; });
+</script>
