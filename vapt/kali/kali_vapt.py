@@ -553,17 +553,18 @@ def recon_tools(build, url, ctx):
     u = urllib.parse.urlparse(url)
     host, port = u.hostname, u.port or (443 if u.scheme == "https" else 80)
     skip = ctx["skip"]
+    # nmap -n: the isolated lab has no DNS server, and reverse lookups would stall every scan
     if "nmap" not in skip and host not in ctx["hosts_scanned"]:
         ctx["hosts_scanned"].add(host)
         res = run_tool(build, "Exposure", f"nmap: top 1000 TCP ports on {host}",
-                       ["nmap", "-Pn", "-sT", "--top-ports", "1000", "-T4", host], ctx, 10)
+                       ["nmap", "-n", "-Pn", "-sT", "--top-ports", "1000", "-T4", host], ctx, 10)
         if res:
             ports = re.findall(r"^(\d+)/tcp\s+open\s+(\S+)", res[0], re.M)
             record(build, "Exposure", f"nmap: top 1000 TCP ports on {host}", "INFO",
                    "open: " + (", ".join(f"{p}/{s}" for p, s in ports) or "none"), res[2])
     if "nmap" not in skip:
         res = run_tool(build, "Exposure", "nmap: service, headers and TLS scripts on the app port",
-                       ["nmap", "-Pn", "-sT", "-sV", "-p", str(port), "--script",
+                       ["nmap", "-n", "-Pn", "-sT", "-sV", "-p", str(port), "--script",
                         "default,http-security-headers,http-methods,ssl-enum-ciphers",
                         "-oX", f"nmap_{build}_service.xml", host], ctx, 10)
         if res:
@@ -639,6 +640,7 @@ def sqlmap_login(build, url, ctx):
         return
     cmd = ["sqlmap", "-u", f"{url}/login", "-p", "username", "--batch", "--dbms", "SQLite", "--level", "1",
            "--risk", "1", "--flush-session", "--disable-coloring", "--answers", "crack=N",
+           "--ignore-code", "401",       # a failed login answers 401, which would otherwise stop sqlmap
            "--output-dir", str(ctx["out"] / build / "sqlmap_login")]
     if https:      # real CSRF token per request, and pace below the 10-per-minute login limit
         cmd += ["--data", "csrf_token=x&username=test&password=test", "--csrf-token", "csrf_token",

@@ -55,9 +55,12 @@ Fixes to the **test scripts** (not the app), found by this run:
 |---|---|---|---|
 | 2026-11-17 | The hardened login limit (10/min per IP) answered the scripts' own logins with 429, so 6 of 19 comparison checks and 18 live checks ran logged out. | `compare_builds.py`, `live_attack.py`: on 429 wait 61 s and retry once. | 0/19, 68/68 |
 | 2026-11-17 | The "correct password refused while locked" check got the rate limiter's 429, not the lockout's 401. | `live_attack.py` waits out the limit first, so the lockout itself is tested. | Pass (401) |
+| 2026-11-17 | nmap stalled on reverse DNS lookups: the lab has no DNS server. | `-n -Pn` on every nmap call (`kali_run.sh`, `kali_vapt.py`, test plan); `kali_run.sh` back to a full `-p-` sweep. | Not yet re-run on Kali |
+| 2026-11-17 | sqlmap stops at the first HTTP 401, and a failed login answers 401, so a login injection test would end at once and prove nothing. | `--ignore-code=401` on both login runs (`kali_run.sh`, `kali_vapt.py`, test plan). | Not yet re-run on Kali |
+| 2026-11-17 | `kali_run.sh` tested the baseline search as a doctor, whose query is safe; only the receptionist's search is injectable. The hardened login run had no CSRF URL or delay, so 400/429 answers would have read as "not injectable". | Defaults to `ravi`, checks the login really succeeded (302), `--tables` not `--dbs` (SQLite); hardened run uses `--csrf-url` and `--delay=7`. | Not yet re-run on Kali |
 
 Notes: checks F05/F06 in the comparison were answered by the rate limit before the lockout (the
 live checks cover the lockout). OWASP ZAP is not installed on the Kali VM and the lab is offline,
-so nikto covers the header scan. A full `nmap -p-` over the host-only adapter takes hours, so
-`vapt/kali_run.sh` scans the top 1000 ports plus 5443/5444. The Kali CLI tool logs (nmap, sqlmap,
-nikto, hydra) and the ransomware drill on the lab VM are still to be added.
+so nikto covers the header scan. The full `nmap -p-` sweep was slow because nmap waited on
+reverse DNS; `vapt/kali_run.sh` now passes `-n` and scans every port. The Kali CLI tool logs (nmap,
+sqlmap, nikto, hydra) and the ransomware drill on the lab VM are still to be added.

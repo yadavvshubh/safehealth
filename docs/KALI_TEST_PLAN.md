@@ -73,9 +73,10 @@ Run every test against the **baseline first** (expect it to succeed) and then th
 ## 2. Nmap — exposure
 
 ```bash
-nmap -sV -p- 192.168.56.10                       # full TCP port + service scan
-nmap --script http-headers,http-methods -p 5444 192.168.56.10
-nmap --script ssl-enum-ciphers -p 5443 192.168.56.10
+# -n -Pn: the isolated lab has no DNS server; without -n nmap stalls on reverse lookups
+nmap -n -Pn -sV -p- 192.168.56.10                 # full TCP port + service scan
+nmap -n -Pn --script http-headers,http-methods -p 5444 192.168.56.10
+nmap -n -Pn --script ssl-enum-ciphers -p 5443 192.168.56.10
 ```
 **Screenshot:** the open-ports table for each build. Expected: only the intended app port reachable;
 TLS ciphers listed for 5443; nothing for 5444 (plain HTTP).
@@ -85,9 +86,12 @@ TLS ciphers listed for 5443; nothing for 5444 (plain HTTP).
 Log in once in the browser, copy the `Cookie` header, then:
 
 ```bash
+# Both builds answer a failed login with HTTP 401, which makes sqlmap stop unless told
+# --ignore-code=401. Without it every login run below ends at once and proves nothing.
+
 # Baseline login (expect: injectable, dumps the users table)
-sqlmap -u "http://192.168.56.10:5444/login" --data="username=x&password=x" \
-       --batch --risk=3 --level=5 --dump -T users
+sqlmap -u "http://192.168.56.10:5444/login" --data="username=x&password=x" -p username \
+       --ignore-code=401 --batch --risk=3 --level=5 --dump -T users
 
 # Baseline search (expect: UNION injection). Log in as the RECEPTIONIST (ravi): the baseline
 # only builds the search SQL by string formatting for that role; doctors use a safe query.
@@ -97,7 +101,7 @@ sqlmap -u "http://192.168.56.10:5444/patients/?q=x" --cookie="sh_session=PASTE" 
 # and without --delay the 10-per-minute login limit answers 429 - either would make
 # "not injectable" meaningless. The cookie on this build is __Host-sh_session.
 sqlmap -u "https://192.168.56.10:5443/login" --data="csrf_token=x&username=x&password=x" -p username \
-       --csrf-token=csrf_token --csrf-url="https://192.168.56.10:5443/login" --delay=7 --batch
+       --csrf-token=csrf_token --csrf-url="https://192.168.56.10:5443/login" --ignore-code=401 --delay=7 --batch
 
 # Hardened search as ravi (expect: not injectable). Paste the __Host-sh_session value.
 sqlmap -u "https://192.168.56.10:5443/patients/?q=x" -p q --cookie="__Host-sh_session=PASTE" \
