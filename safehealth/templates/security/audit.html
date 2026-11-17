@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Audit log - SafeHealth{% endblock %}
+{% block content %}
+<h1>Audit log</h1>
+<form method="get" class="grid">
+  <label>User<input name="username" value="{{ filters.username }}" maxlength="64"></label>
+  <label>Action starts with<input name="action" value="{{ filters.action }}" maxlength="64" placeholder="patient."></label>
+  <label>Patient ID<input name="patient_id" value="{{ filters.patient_id }}" inputmode="numeric"></label>
+  <label>Result<select name="result"><option value="">any</option>{% for r in ('success', 'failure', 'denied') %}<option {% if filters.result == r %}selected{% endif %}>{{ r }}</option>{% endfor %}</select></label>
+  <label>IP<input name="ip" value="{{ filters.ip }}" maxlength="64"></label>
+  <label>Day<input type="date" name="day" value="{{ filters.day }}"></label>
+  <button class="btn" type="submit">Search</button>
+</form>
+<table><thead><tr><th>#</th><th>Time</th><th>User</th><th>Role</th><th>Action</th><th>Patient</th><th>IP</th><th>Result</th><th>Detail</th><th>Hash</th></tr></thead><tbody>
+{% for e in entries %}<tr><td>{{ e.id }}</td><td>{{ e.ts|dt }}</td><td>{{ e.username }}</td><td>{{ e.role }}</td><td>{{ e.action }}</td><td>{{ e.patient_id or '' }}</td><td>{{ e.ip }}</td>
+<td><span class="res {{ e.result }}">{{ e.result }}</span></td>
+<td class="detail">{% for k, val in e.detail_obj.items() %}{{ k }}={{ val }} {% endfor %}</td><td class="hash" title="{{ e.hash }}">{{ e.hash[:10] }}</td></tr>
+{% else %}<tr><td colspan="10" class="empty">No matching entries.</td></tr>{% endfor %}
+</tbody></table>
+<p class="pager">
+{% if page > 1 %}<a href="{{ url_for('security.audit_search', page=page - 1, **filters) }}">Newer</a>{% endif %}
+<span>Page {{ page }}</span>
+{% if has_next %}<a href="{{ url_for('security.audit_search', page=page + 1, **filters) }}">Older</a>{% endif %}
+</p>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="head"><h1>Appointments</h1>
+{% if can('appointments.manage') %}<a class="btn" href="{{ url_for('appointments.new') }}">Book appointment</a>{% endif %}</div>
+<table><thead><tr><th>When</th><th>Patient</th><th>Doctor</th><th>Note</th><th>Status</th></tr></thead><tbody>
+{% for a in appointments %}<tr><td>{{ a.scheduled_at|replace('T', ' ') }}</td>
+<td><a href="{{ url_for('patients.detail', patient_id=a.patient_id) }}">{{ a.patient }}</a></td><td>{{ a.doctor }}</td><td>{{ a.note }}</td>
+<td>{% if can('appointments.manage') %}<form method="post" action="{{ url_for('appointments.status', appointment_id=a.id) }}" class="inline">{{ m.csrf() }}
+<select name="status">{% for s in statuses %}<option {% if s == a.status %}selected{% endif %}>{{ s }}</option>{% endfor %}</select><button class="btn small ghost">Set</button></form>
+{% else %}{{ a.status }}{% endif %}</td></tr>
+{% else %}<tr><td colspan="5" class="empty">No appointments.</td></tr>{% endfor %}
+</tbody></table>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Security dashboard - SafeHealth{% endblock %}
+{% block content %}
+<div class="head"><h1>Security dashboard</h1>
+<span><span class="hint" id="live">live</span> {{ m.post(url_for('security.verify_chain'), 'Verify audit chain', 'btn ghost') }}</span></div>
+<div class="tiles" id="tiles">
+  {% for label, value in summary.counts.items() %}<div class="tile{% if 'High' in label and value %} hot{% endif %}"><span class="num">{{ value }}</span>{{ label }}</div>{% endfor %}
+</div>
+<section class="card">
+  <h2>Alerts</h2>
+  <table><thead><tr><th>Last seen</th><th>Severity</th><th>Rule</th><th>What happened</th><th>Automatic response</th><th>Hits</th><th>Status</th></tr></thead>
+  <tbody id="alerts" data-csrf="{{ csrf_token() }}">
+  {% for a in summary.alerts %}<tr><td>{{ a.time }}</td><td><span class="sev {{ a.severity }}">{{ a.severity }}</span></td><td>{{ a.rule }}</td>
+  <td>{{ a.summary }}</td><td>{{ a.response }}</td><td>{{ a.hits }}</td>
+  <td>{% if a.status == 'open' %}{{ m.post(url_for('security.acknowledge', alert_id=a.id), 'Acknowledge') }}{% else %}ack by {{ a.ack_by }}{% endif %}</td></tr>
+  {% else %}<tr><td colspan="7" class="empty">No alerts.</td></tr>{% endfor %}
+  </tbody></table>
+</section>
+<section class="card">
+  <h2>Latest events</h2>
+  <table><thead><tr><th>#</th><th>Time</th><th>User</th><th>Role</th><th>Action</th><th>Patient</th><th>IP</th><th>Result</th></tr></thead><tbody>
+  {% for e in events %}<tr><td>{{ e.id }}</td><td>{{ e.ts|dt }}</td><td>{{ e.username }}</td><td>{{ e.role }}</td><td>{{ e.action }}</td><td>{{ e.patient_id or '' }}</td><td>{{ e.ip }}</td><td><span class="res {{ e.result }}">{{ e.result }}</span></td></tr>{% endfor %}
+  </tbody></table>
+  <p><a href="{{ url_for('security.audit_search') }}">Search the full audit log</a></p>
+</section>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='dashboard.js') }}"></script>{% endblock %}

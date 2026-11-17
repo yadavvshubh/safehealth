@@ -1,0 +1,140 @@
+{
+  "label": "baseline",
+  "target": "http://127.0.0.1:5444",
+  "when": "2026-11-15 18:18:56",
+  "results": [
+    {
+      "id": "F01",
+      "area": "SQL injection",
+      "title": "Login bypass with ' OR '1'='1' --",
+      "status": "VULNERABLE",
+      "evidence": "Logged in as 'Mr. Sharma' without any password"
+    },
+    {
+      "id": "F02",
+      "area": "SQL injection",
+      "title": "UNION injection in patient search leaks password hashes",
+      "status": "VULNERABLE",
+      "evidence": "6 staff accounts with hashes shown, e.g. sharma -> 9a77b2ceacf76237..."
+    },
+    {
+      "id": "F03",
+      "area": "Information disclosure",
+      "title": "Database error text shown to the user",
+      "status": "VULNERABLE",
+      "evidence": "HTTP 500: Database error: unrecognized token: \"2d711642b726b04401627ca9fbac32f5c8530fb1903cc4db02258"
+    },
+    {
+      "id": "F04",
+      "area": "Authentication",
+      "title": "Password alone gives access (no second factor)",
+      "status": "VULNERABLE",
+      "evidence": "Patient record opened after the password step only"
+    },
+    {
+      "id": "F05",
+      "area": "Authentication",
+      "title": "No account lockout (10 wrong passwords, then the right one)",
+      "status": "VULNERABLE",
+      "evidence": "Correct password still accepted after 10 failures"
+    },
+    {
+      "id": "F06",
+      "area": "Authentication",
+      "title": "Login error reveals which usernames exist",
+      "status": "VULNERABLE",
+      "evidence": "'Wrong password.' vs 'No such user.'"
+    },
+    {
+      "id": "F07",
+      "area": "Broken access control",
+      "title": "Receptionist opens the security dashboard and staff admin",
+      "status": "VULNERABLE",
+      "evidence": "/security/ -> 200, /admin/users -> 200"
+    },
+    {
+      "id": "F08",
+      "area": "Broken access control",
+      "title": "IDOR: doctor opens another doctor's patient by changing the ID",
+      "status": "VULNERABLE",
+      "evidence": "/patients/1,2,3 -> [200, 200, 200] (not his patients)"
+    },
+    {
+      "id": "F09",
+      "area": "Broken access control",
+      "title": "Receptionist can read diagnosis and allergies",
+      "status": "VULNERABLE",
+      "evidence": "Diagnosis 'Type 2 diabetes' and allergy shown to reception"
+    },
+    {
+      "id": "F10",
+      "area": "Cross-site scripting",
+      "title": "Stored XSS in the diagnosis field",
+      "status": "VULNERABLE",
+      "evidence": "Script tag rendered unescaped on the patient page"
+    },
+    {
+      "id": "F11",
+      "area": "CSRF",
+      "title": "Forged POST without CSRF token changes a diagnosis",
+      "status": "VULNERABLE",
+      "evidence": "HTTP 302; record changed by a request with no token"
+    },
+    {
+      "id": "F12",
+      "area": "Session management",
+      "title": "Session cookie missing HttpOnly / Secure / SameSite",
+      "status": "VULNERABLE",
+      "evidence": "Missing: HttpOnly, Secure, SameSite"
+    },
+    {
+      "id": "F13",
+      "area": "Session management",
+      "title": "Session still valid after logout (cookie replay)",
+      "status": "VULNERABLE",
+      "evidence": "Old cookie still opens the patient list"
+    },
+    {
+      "id": "F14",
+      "area": "Security misconfiguration",
+      "title": "Security headers missing (CSP, X-Frame-Options, nosniff)",
+      "status": "VULNERABLE",
+      "evidence": "Missing: Content-Security-Policy, X-Frame-Options, X-Content-Type-Options, Referrer-Policy"
+    },
+    {
+      "id": "F15",
+      "area": "Cryptographic failures",
+      "title": "Traffic not encrypted (no HTTPS)",
+      "status": "VULNERABLE",
+      "evidence": "Served over plain HTTP: logins and records readable on the network"
+    },
+    {
+      "id": "F16",
+      "area": "Cryptographic failures",
+      "title": "Sensitive fields stored in plain text",
+      "status": "VULNERABLE",
+      "evidence": "Diagnosis readable directly in the database file"
+    },
+    {
+      "id": "F17",
+      "area": "Cryptographic failures",
+      "title": "Weak password hashing (fast, unsalted)",
+      "status": "VULNERABLE",
+      "evidence": "Unsalted SHA-256: identical passwords give identical hashes; GPU-crackable"
+    },
+    {
+      "id": "F18",
+      "area": "Logging and monitoring",
+      "title": "Attacks above raised no security alert",
+      "status": "VULNERABLE",
+      "evidence": "0 alerts after brute force, injection, IDOR and privilege attempts"
+    },
+    {
+      "id": "F19",
+      "area": "Security misconfiguration",
+      "title": "Oversized request body accepted",
+      "status": "VULNERABLE",
+      "evidence": "200 KB body processed (HTTP 401)"
+    }
+  ]
+}

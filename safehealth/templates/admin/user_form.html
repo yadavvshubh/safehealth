@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="card">
+  <h1>Create staff account</h1>
+  {% if error %}<p class="flash error">{{ error }}</p>{% endif %}
+  <form method="post" autocomplete="off">
+    {{ m.csrf() }}
+    {{ m.field("Username (lower-case letters, digits, . or _)", "username", form.get('username', ''), extra='maxlength="32"') }}
+    {{ m.field("Full name", "full_name", form.get('full_name', ''), extra='maxlength="80"') }}
+    <label>Role<select name="role">{% for r in roles %}<option {% if form.get('role') == r %}selected{% endif %}>{{ r }}</option>{% endfor %}</select></label>
+    {{ m.field("Initial password (12+ characters, upper, lower, digit)", "password", type="password") }}
+    <button class="btn" type="submit">Create</button>
+  </form>
+</section>
+{% endblock %}

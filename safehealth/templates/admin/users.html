@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="head"><h1>Staff accounts</h1><a class="btn" href="{{ url_for('admin.new_user') }}">Create account</a></div>
+<table><thead><tr><th>Username</th><th>Name</th><th>Role</th><th>Status</th><th>MFA</th><th>Sessions</th><th>Actions</th></tr></thead><tbody>
+{% for u in users %}<tr>
+<td>{{ u.username }}</td><td>{{ u.full_name }}</td><td>{{ u.role }}</td>
+<td>{% if not u.is_active %}<span class="sev Medium">deactivated</span>{% elif u.locked_until > now %}<span class="sev High">locked</span>{% else %}active{% endif %}</td>
+<td>{{ 'enrolled' if u.totp_enabled else 'not set up' }}</td><td>{{ u.live }}</td>
+<td>
+{% if u.is_active %}{{ m.post(url_for('admin.user_action', user_id=u.id, action='deactivate'), 'Deactivate', 'btn small ghost') }}
+{% else %}{{ m.post(url_for('admin.user_action', user_id=u.id, action='activate'), 'Activate') }}{% endif %}
+{% if u.locked_until > now %}{{ m.post(url_for('admin.user_action', user_id=u.id, action='unlock'), 'Unlock') }}{% endif %}
+{{ m.post(url_for('admin.user_action', user_id=u.id, action='end-sessions'), 'End sessions', 'btn small ghost') }}
+{{ m.post(url_for('admin.user_action', user_id=u.id, action='reset-mfa'), 'Reset MFA', 'btn small ghost') }}
+</td></tr>{% endfor %}
+</tbody></table>
+{% endblock %}

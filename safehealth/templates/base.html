@@ -1,0 +1,33 @@
+{% import "_m.html" as m with context %}<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}SafeHealth{% endblock %}</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="{{ url_for('main.home') }}">SafeHealth</a>
+  {% if current_user %}
+  <nav>
+    {% if can('patients.list') %}<a href="{{ url_for('patients.index') }}">Patients</a>{% endif %}
+    {% if can('appointments.view') %}<a href="{{ url_for('appointments.index') }}">Appointments</a>{% endif %}
+    {% if can('users.manage') %}<a href="{{ url_for('admin.users') }}">Staff accounts</a>{% endif %}
+    {% if can('security.view') %}<a href="{{ url_for('security.dashboard') }}">Security</a><a href="{{ url_for('security.audit_search') }}">Audit log</a>{% endif %}
+  </nav>
+  <div class="who">
+    <span>{{ current_user.full_name }} <em class="role">{{ current_user.role }}</em></span>
+    <a href="{{ url_for('auth.change_password') }}">Password</a>
+    {{ m.post(url_for('auth.logout'), 'Log out', 'btn small ghost') }}
+  </div>
+  {% endif %}
+</header>
+<main>
+  {% for category, message in flashes() %}<p class="flash {{ category }}">{{ message }}</p>{% endfor %}
+  {% block content %}{% endblock %}
+</main>
+<footer>Lab prototype. Synthetic data only. Not for production use.</footer>
+{% block scripts %}{% endblock %}
+</body>
+</html>

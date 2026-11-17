@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="head"><h1>{{ p.full_name }}</h1>
+{% if can('patients.register') %}<span><a class="btn ghost" href="{{ url_for('patients.edit', patient_id=p.id) }}">Edit details</a>
+<a class="btn" href="{{ url_for('appointments.new', patient_id=p.id) }}">Book appointment</a></span>{% endif %}</div>
+
+<section class="card">
+  <h2>Details</h2>
+  <dl><dt>Date of birth</dt><dd>{{ p.dob }}</dd><dt>Gender</dt><dd>{{ p.gender }}</dd>
+  <dt>Phone</dt><dd>{{ p.phone }}</dd><dt>Address</dt><dd>{{ p.address or '-' }}</dd></dl>
+</section>
+
+{% if 'diagnosis' in scope %}
+<section class="card">
+  <h2>Clinical record</h2>
+  {% if can('clinical.update') %}
+  <form method="post" action="{{ url_for('patients.clinical', patient_id=p.id) }}">
+    {{ m.csrf() }}
+    <label>Allergies<textarea name="allergies" maxlength="500" rows="2">{{ p.allergies }}</textarea></label>
+    <label>Current diagnosis<textarea name="diagnosis" maxlength="1000" rows="3">{{ p.diagnosis }}</textarea></label>
+    <label>Medical history<textarea name="history" maxlength="4000" rows="5">{{ p.history }}</textarea></label>
+    <button class="btn" type="submit">Save clinical record</button>
+  </form>
+  {% else %}
+  <dl><dt>Allergies</dt><dd class="pre">{{ p.allergies or '-' }}</dd><dt>Current diagnosis</dt><dd class="pre">{{ p.diagnosis or '-' }}</dd></dl>
+  <p class="hint">Limited view: full history and prescriptions are available to the assigned doctor only.</p>
+  {% endif %}
+</section>
+{% endif %}
+
+{% if 'vitals' in scope %}
+<section class="card">
+  <h2>Vitals and observations</h2>
+  <form method="post" action="{{ url_for('patients.vitals', patient_id=p.id) }}" class="grid">
+    {{ m.csrf() }}
+    <label>Temp (&deg;C)<input name="temperature" inputmode="decimal"></label>
+    <label>Pulse<input name="pulse" inputmode="numeric"></label>
+    <label>BP sys<input name="bp_sys" inputmode="numeric"></label>
+    <label>BP dia<input name="bp_dia" inputmode="numeric"></label>
+    <label>SpO2 %<input name="spo2" inputmode="numeric"></label>
+    <label class="wide">Observations<input name="notes" maxlength="500"></label>
+    <button class="btn" type="submit">Record</button>
+  </form>
+  <table><thead><tr><th>When</th><th>Temp</th><th>Pulse</th><th>BP</th><th>SpO2</th><th>Observations</th><th>By</th></tr></thead><tbody>
+  {% for v in vitals %}<tr><td>{{ v.recorded_at|dt }}</td><td>{{ v.temperature or '' }}</td><td>{{ v.pulse or '' }}</td>
+  <td>{% if v.bp_sys %}{{ v.bp_sys }}/{{ v.bp_dia or '?' }}{% endif %}</td><td>{{ v.spo2 or '' }}</td><td>{{ v.notes }}</td><td>{{ v.by_name }}</td></tr>
+  {% else %}<tr><td colspan="7" class="empty">No vitals recorded.</td></tr>{% endfor %}
+  </tbody></table>
+</section>
+{% endif %}
+
+{% if 'prescriptions' in scope %}
+<section class="card">
+  <h2>Prescriptions</h2>
+  <form method="post" action="{{ url_for('patients.prescribe', patient_id=p.id) }}" class="grid">
+    {{ m.csrf() }}
+    <label>Medicine<input name="drug" maxlength="100" required></label>
+    <label>Dosage<input name="dosage" maxlength="100" required></label>
+    <label class="wide">Instructions<input name="instructions" maxlength="300"></label>
+    <button class="btn" type="submit">Add prescription</button>
+  </form>
+  <table><thead><tr><th>Date</th><th>Medicine</th><th>Dosage</th><th>Instructions</th><th>Doctor</th></tr></thead><tbody>
+  {% for r in prescriptions %}<tr><td>{{ r.created_at|dt }}</td><td>{{ r.drug }}</td><td>{{ r.dosage }}</td><td>{{ r.instructions }}</td><td>{{ r.doctor }}</td></tr>
+  {% else %}<tr><td colspan="5" class="empty">No prescriptions.</td></tr>{% endfor %}
+  </tbody></table>
+</section>
+{% endif %}
+
+{% if 'care_team' in scope %}
+<section class="card">
+  <h2>Care team</h2>
+  <p class="hint">Only the doctors and nurses listed here can open this patient's clinical record.</p>
+  <ul class="team">
+  {% for t in team %}<li>{{ t.full_name }} <em class="role">{{ t.role }}</em>
+    <form method="post" action="{{ url_for('patients.team', patient_id=p.id) }}" class="inline">{{ m.csrf() }}
+    <input type="hidden" name="user_id" value="{{ t.id }}"><input type="hidden" name="action" value="remove"><button class="btn small ghost">Remove</button></form></li>
+  {% else %}<li class="empty">Nobody assigned yet.</li>{% endfor %}
+  </ul>
+  <form method="post" action="{{ url_for('patients.team', patient_id=p.id) }}" class="search">{{ m.csrf() }}
+    <input type="hidden" name="action" value="assign">
+    <select name="user_id">{% for s in staff %}<option value="{{ s.id }}">{{ s.full_name }} ({{ s.role }})</option>{% endfor %}</select>
+    <button class="btn">Assign</button></form>
+</section>
+<section class="card">
+  <h2>Appointments</h2>
+  <table><thead><tr><th>When</th><th>Doctor</th><th>Note</th><th>Status</th></tr></thead><tbody>
+  {% for a in appointments %}<tr><td>{{ a.scheduled_at|replace('T', ' ') }}</td><td>{{ a.doctor }}</td><td>{{ a.note }}</td><td>{{ a.status }}</td></tr>
+  {% else %}<tr><td colspan="4" class="empty">No appointments.</td></tr>{% endfor %}
+  </tbody></table>
+</section>
+{% endif %}
+{% endblock %}

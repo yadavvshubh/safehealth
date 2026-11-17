@@ -1,0 +1,140 @@
+{
+  "label": "hardened",
+  "target": "https://127.0.0.1:5443",
+  "when": "2026-11-15 18:20:30",
+  "results": [
+    {
+      "id": "F01",
+      "area": "SQL injection",
+      "title": "Login bypass with ' OR '1'='1' --",
+      "status": "BLOCKED",
+      "evidence": "HTTP 401; no session granted"
+    },
+    {
+      "id": "F02",
+      "area": "SQL injection",
+      "title": "UNION injection in patient search leaks password hashes",
+      "status": "BLOCKED",
+      "evidence": "HTTP 200; payload treated as a plain search term"
+    },
+    {
+      "id": "F03",
+      "area": "Information disclosure",
+      "title": "Database error text shown to the user",
+      "status": "BLOCKED",
+      "evidence": "HTTP 401; generic message only"
+    },
+    {
+      "id": "F04",
+      "area": "Authentication",
+      "title": "Password alone gives access (no second factor)",
+      "status": "BLOCKED",
+      "evidence": "After password: redirected to enroll; record request -> 302"
+    },
+    {
+      "id": "F05",
+      "area": "Authentication",
+      "title": "No account lockout (10 wrong passwords, then the right one)",
+      "status": "BLOCKED",
+      "evidence": "Account locked: correct password refused (HTTP 401)"
+    },
+    {
+      "id": "F06",
+      "area": "Authentication",
+      "title": "Login error reveals which usernames exist",
+      "status": "BLOCKED",
+      "evidence": "Same message for both: 'Invalid username or password, or the account is temporarily locked.'"
+    },
+    {
+      "id": "F07",
+      "area": "Broken access control",
+      "title": "Receptionist opens the security dashboard and staff admin",
+      "status": "BLOCKED",
+      "evidence": "/security/ -> 403, /admin/users -> 403"
+    },
+    {
+      "id": "F08",
+      "area": "Broken access control",
+      "title": "IDOR: doctor opens another doctor's patient by changing the ID",
+      "status": "BLOCKED",
+      "evidence": "/patients/1,2,3 -> [403, 403, 403]"
+    },
+    {
+      "id": "F09",
+      "area": "Broken access control",
+      "title": "Receptionist can read diagnosis and allergies",
+      "status": "BLOCKED",
+      "evidence": "Only name, contact and appointments shown"
+    },
+    {
+      "id": "F10",
+      "area": "Cross-site scripting",
+      "title": "Stored XSS in the diagnosis field",
+      "status": "BLOCKED",
+      "evidence": "Payload shown as text (&lt;script&gt;)"
+    },
+    {
+      "id": "F11",
+      "area": "CSRF",
+      "title": "Forged POST without CSRF token changes a diagnosis",
+      "status": "BLOCKED",
+      "evidence": "HTTP 400; record unchanged"
+    },
+    {
+      "id": "F12",
+      "area": "Session management",
+      "title": "Session cookie missing HttpOnly / Secure / SameSite",
+      "status": "BLOCKED",
+      "evidence": "HttpOnly, Secure, SameSite=Strict, __Host- prefix"
+    },
+    {
+      "id": "F13",
+      "area": "Session management",
+      "title": "Session still valid after logout (cookie replay)",
+      "status": "BLOCKED",
+      "evidence": "Old cookie rejected (HTTP 302 -> login)"
+    },
+    {
+      "id": "F14",
+      "area": "Security misconfiguration",
+      "title": "Security headers missing (CSP, X-Frame-Options, nosniff)",
+      "status": "BLOCKED",
+      "evidence": "All present"
+    },
+    {
+      "id": "F15",
+      "area": "Cryptographic failures",
+      "title": "Traffic not encrypted (no HTTPS)",
+      "status": "BLOCKED",
+      "evidence": "HTTPS only (TLS); HSTS header set"
+    },
+    {
+      "id": "F16",
+      "area": "Cryptographic failures",
+      "title": "Sensitive fields stored in plain text",
+      "status": "BLOCKED",
+      "evidence": "Diagnosis, allergies, history, notes, prescriptions encrypted (Fernet)"
+    },
+    {
+      "id": "F17",
+      "area": "Cryptographic failures",
+      "title": "Weak password hashing (fast, unsalted)",
+      "status": "BLOCKED",
+      "evidence": "Salted slow hash (stub) - test stand-in for Argon2id (real library not installed)"
+    },
+    {
+      "id": "F18",
+      "area": "Logging and monitoring",
+      "title": "Attacks above raised no security alert",
+      "status": "BLOCKED",
+      "evidence": "2 alerts: brute_force, privilege_violation"
+    },
+    {
+      "id": "F19",
+      "area": "Security misconfiguration",
+      "title": "Oversized request body accepted",
+      "status": "BLOCKED",
+      "evidence": "Refused with HTTP 413"
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Set up two-step sign-in - SafeHealth{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Set up two-step sign-in</h1>
+  {% if error %}<p class="flash error">{{ error }}</p>{% endif %}
+  <ol>
+    <li>Open an authenticator app (Google Authenticator, Microsoft Authenticator, Aegis, ...).</li>
+    <li>{% if qr %}Scan this code, or type the key below.{% else %}Add an account and type this key (time-based).{% endif %}</li>
+  </ol>
+  {% if qr %}<div class="qr">{{ qr }}</div>{% endif %}
+  <p class="secret">{{ secret }}</p>
+  <form method="post" autocomplete="off">
+    {{ m.csrf() }}
+    <label>Enter the 6-digit code the app shows
+      <input name="code" inputmode="numeric" pattern="[0-9 ]{6,7}" maxlength="7" required autofocus></label>
+    <button class="btn" type="submit">Confirm and sign in</button>
+  </form>
+</section>
+{% endblock %}

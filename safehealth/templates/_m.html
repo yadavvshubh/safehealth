@@ -1,0 +1,7 @@
+{% macro csrf() %}<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">{% endmacro %}
+{% macro post(url, label, cls="btn small") %}
+<form method="post" action="{{ url }}" class="inline">{{ csrf() }}<button class="{{ cls }}" type="submit">{{ label }}</button></form>
+{% endmacro %}
+{% macro field(label, name, value="", type="text", required=true, extra="") %}
+<label>{{ label }}<input type="{{ type }}" name="{{ name }}" value="{{ value }}" {% if required %}required{% endif %} {{ extra|safe }}></label>
+{% endmacro %}

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+<h1>Welcome, {{ current_user.full_name }}</h1>
+<p class="hint">Signed in as <strong>{{ current_user.role }}</strong>. You only see what this role needs.</p>
+<div class="tiles">
+  {% for label, value in stats.items() %}<div class="tile"><span class="num">{{ value }}</span>{{ label }}</div>{% endfor %}
+</div>
+<p class="actions">
+  {% if can('patients.list') %}<a class="btn" href="{{ url_for('patients.index') }}">Patients</a>{% endif %}
+  {% if can('patients.register') %}<a class="btn ghost" href="{{ url_for('patients.new') }}">Register patient</a>{% endif %}
+  {% if can('appointments.view') %}<a class="btn ghost" href="{{ url_for('appointments.index') }}">Appointments</a>{% endif %}
+  {% if can('users.manage') %}<a class="btn" href="{{ url_for('admin.users') }}">Staff accounts</a>{% endif %}
+  {% if can('security.view') %}<a class="btn ghost" href="{{ url_for('security.dashboard') }}">Security dashboard</a>{% endif %}
+</p>
+{% endblock %}

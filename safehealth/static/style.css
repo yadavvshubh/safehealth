@@ -1,0 +1,126 @@
+/* SafeHealth UI — Apple design language (single Action Blue accent, pills, hairlines,
+   no chrome shadows, 400/600/700 weight ladder). Class names unchanged. */
+:root {
+  /* Accent — the only interactive color */
+  --primary:#0066cc; --primary-focus:#0071e3; --primary-on-dark:#2997ff;
+  /* Text */
+  --ink:#1d1d1f; --ink-80:#333333; --muted:#6e6e73; --on-dark:#ffffff; --muted-on-dark:#cccccc;
+  /* Surfaces */
+  --canvas:#ffffff; --parchment:#f5f5f7; --pearl:#fafafc; --tile-dark:#1d1d1f;
+  /* Hairlines */
+  --hairline:#e0e0e0; --divider-soft:#f0f0f0;
+  /* Status — state only */
+  --danger:#ff3b30; --success:#34c759; --warning:#ff9500;
+  /* Darker status tones for TEXT (the bright ones fail WCAG AA at small sizes) */
+  --danger-text:#d70015; --warning-text:#a05a00; --success-text:#1a7f3c;
+  --scrim:rgba(0,0,0,.45);
+  /* Radius scale */
+  --r-sm:6px; --r-md:10px; --r-lg:14px; --r-pill:999px;
+  /* Back-compat aliases used in a few places */
+  --line:var(--hairline); --bg:var(--parchment); --card:var(--canvas); --brand:var(--primary);
+  --high:var(--danger); --med:var(--warning); --ok:var(--success);
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  font:400 17px/1.5 -apple-system,system-ui,"SF Pro Text","Segoe UI",Inter,Roboto,sans-serif;
+  color:var(--ink); background:var(--canvas); -webkit-font-smoothing:antialiased;
+}
+a { color:var(--primary); text-decoration:none; }
+a:hover { text-decoration:underline; }
+
+/* Top bar — a dark tile; links use the sky accent, not Action Blue */
+.top { display:flex; align-items:center; gap:24px; padding:12px 24px; background:var(--tile-dark); color:var(--on-dark); flex-wrap:wrap; }
+.top a { color:var(--muted-on-dark); }
+.top a:hover { color:var(--on-dark); text-decoration:none; }
+.brand { font-weight:700; font-size:20px; color:var(--on-dark) !important; letter-spacing:-.2px; }
+.top nav { display:flex; gap:20px; flex:1; flex-wrap:wrap; }
+.who { display:flex; align-items:center; gap:14px; font-size:15px; }
+.role { font-style:normal; font-size:11px; font-weight:600; text-transform:uppercase; letter-spacing:.6px; background:rgba(255,255,255,.12); color:var(--muted-on-dark); padding:3px 9px; border-radius:var(--r-pill); }
+
+main { max-width:1180px; margin:24px auto; padding:0 24px; }
+footer { text-align:center; color:var(--muted); font-size:13px; padding:24px; }
+
+h1 { font-size:34px; font-weight:700; letter-spacing:-.4px; margin:0 0 16px; }
+h2 { font-size:20px; font-weight:600; margin:0 0 12px; }
+.head { display:flex; justify-content:space-between; align-items:center; gap:12px; margin-bottom:16px; flex-wrap:wrap; }
+.head h1 { margin:0; }
+
+/* Cards — hairline border, no shadow, generous padding */
+.card { background:var(--canvas); border:1px solid var(--hairline); border-radius:var(--r-lg); padding:20px; margin-bottom:20px; overflow-x:auto; }
+.narrow { max-width:440px; margin:56px auto; }
+
+/* Forms */
+label { display:block; font-size:15px; font-weight:600; color:var(--ink); margin-bottom:16px; }
+input, select, textarea {
+  display:block; width:100%; margin-top:4px; padding:12px 16px; font-family:inherit; font-size:17px; font-weight:400; line-height:1.4;
+  color:var(--ink); border:1px solid var(--hairline); border-radius:var(--r-md); background:var(--canvas);
+}
+input::placeholder, textarea::placeholder { color:var(--muted); }
+input:focus, select:focus, textarea:focus { outline:none; border-color:var(--primary); }
+
+/* Buttons — the primary is a filled Action Blue pill; the pill radius carries emphasis */
+.btn {
+  display:inline-flex; align-items:center; gap:8px; padding:12px 24px; border:1px solid var(--primary);
+  border-radius:var(--r-pill); background:var(--primary); color:var(--on-dark); font-family:inherit; font-size:17px; font-weight:400; line-height:1.2;
+  cursor:pointer; text-decoration:none; transition:transform .12s ease, background .15s ease, opacity .15s ease;
+}
+.btn:hover { background:#005bb8; text-decoration:none; }
+.btn:active { transform:scale(.96); }
+/* 'ghost' is the outline pill: still clearly a button, second to the filled CTA */
+.btn.ghost { background:var(--canvas); color:var(--primary); border-color:var(--primary); }
+.btn.ghost:hover { background:var(--parchment); }
+.top .btn.ghost { background:transparent; color:var(--on-dark); border-color:rgba(255,255,255,.4); }
+.top .btn.ghost:hover { color:var(--on-dark); background:rgba(255,255,255,.08); }
+.btn.small { padding:7px 16px; font-size:15px; }
+.btn:disabled { opacity:.5; cursor:default; }
+
+.inline { display:inline-block; margin:0 4px 0 0; }
+.inline select { display:inline-block; width:auto; margin:0 4px 0 0; padding:7px 12px; }
+
+/* Search — pill field */
+.search { display:flex; gap:8px; margin-bottom:16px; max-width:520px; }
+.search input, .search select { margin:0; border-radius:var(--r-pill); }
+.search .btn { border-radius:var(--r-pill); }
+
+.grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:0 16px; align-items:end; margin-bottom:16px; }
+.grid .wide { grid-column:span 2; } .grid .btn { margin-bottom:16px; }
+
+/* Tables — hairlines only, parchment header, no heavy rules */
+table { width:100%; border-collapse:collapse; background:var(--canvas); border:1px solid var(--hairline); border-radius:var(--r-lg); font-size:15px; overflow:hidden; }
+th, td { text-align:left; padding:12px 16px; border-bottom:1px solid var(--divider-soft); vertical-align:top; }
+tr:last-child td { border-bottom:none; }
+th { font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:.4px; color:var(--muted); background:var(--parchment); border-bottom:1px solid var(--hairline); }
+.empty { color:var(--muted); text-align:center; padding:20px; list-style:none; }
+
+dl { display:grid; grid-template-columns:160px 1fr; gap:8px 16px; margin:0; }
+dt { color:var(--muted); font-weight:600; } dd { margin:0; }
+.pre { white-space:pre-wrap; }
+.hint { color:var(--muted); font-size:15px; }
+
+/* Flash banners — surface + hairline + semantic text, no heavy fills */
+.flash { padding:12px 16px; border-radius:var(--r-md); background:var(--parchment); border:1px solid var(--hairline); color:var(--ink); margin-bottom:16px; }
+.flash.error { background:var(--canvas); border-color:var(--danger); color:var(--danger-text); }
+.flash.ok { background:var(--canvas); border-color:var(--success); color:var(--success-text); }
+
+/* Stat tiles — parchment surfaces, big semibold value; the hot tile signals state */
+.tiles { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px; margin:16px 0 20px; }
+.tile { background:var(--parchment); border:1px solid transparent; border-radius:var(--r-lg); padding:16px; font-size:13px; color:var(--muted); }
+.tile .num { display:block; font-size:30px; font-weight:600; color:var(--ink); letter-spacing:-.3px; margin-bottom:2px; }
+.tile.hot { background:var(--canvas); border-color:var(--danger); }
+.tile.hot .num { color:var(--danger-text); }
+
+/* Status badges — pill, parchment + semantic foreground */
+.sev, .res { display:inline-block; padding:3px 10px; border-radius:var(--r-pill); font-size:12px; font-weight:600; }
+.sev.High { background:var(--parchment); color:var(--danger-text); }
+.sev.Medium { background:var(--parchment); color:var(--warning-text); }
+.res.success { color:var(--success-text); } .res.denied, .res.failure { color:var(--danger-text); }
+
+/* MFA enrolment */
+.secret { font:600 15px/1.5 ui-monospace,"SF Mono",Consolas,monospace; letter-spacing:.5px; background:var(--parchment); padding:12px; border-radius:var(--r-md); text-align:center; word-break:break-all; }
+.qr { text-align:center; } .qr svg { width:200px; height:200px; }
+
+.detail { font-size:13px; color:var(--muted); max-width:260px; word-break:break-word; }
+.hash { font-family:ui-monospace,"SF Mono",Consolas,monospace; font-size:12px; color:var(--muted); }
+.team { padding-left:18px; } .team li { margin-bottom:8px; }
+.actions { display:flex; gap:10px; flex-wrap:wrap; } .pager { display:flex; gap:16px; margin-top:16px; }

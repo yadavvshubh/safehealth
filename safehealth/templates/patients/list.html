@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="head"><h1>Patients</h1>
+{% if can('patients.register') %}<a class="btn" href="{{ url_for('patients.new') }}">Register patient</a>{% endif %}</div>
+<form method="get" class="search"><input name="q" value="{{ q }}" maxlength="80" placeholder="Search by name"><button class="btn ghost">Search</button></form>
+<table>
+  <thead><tr><th>Name</th><th>Date of birth</th><th>Phone</th></tr></thead>
+  <tbody>
+  {% for p in patients %}<tr><td><a href="{{ url_for('patients.detail', patient_id=p.id) }}">{{ p.full_name }}</a></td><td>{{ p.dob }}</td><td>{{ p.phone }}</td></tr>
+  {% else %}<tr><td colspan="3" class="empty">No patients{% if current_user.role != 'receptionist' %} assigned to you{% endif %}.</td></tr>{% endfor %}
+  </tbody>
+</table>
+{% endblock %}
