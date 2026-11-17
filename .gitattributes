@@ -1,4 +1,2 @@
 # Shell scripts run on the Kali VM: keep LF even in a Windows checkout, or sh fails on "\r".
-*.sh  text eol=lf
-# Batch files run on Windows: keep CRLF in every checkout.
-*.bat text eol=crlf
+*.sh text eol=lf
