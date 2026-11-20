@@ -86,7 +86,7 @@ Schedule the daily backup with Windows Task Scheduler or cron.
 3. From Kali: brute-force `anita`'s login (Burp Intruder / ZAP), then SQLmap against `/login` and `/patients/?q=`.
 4. Dashboard shows the High alert; Staff accounts shows `anita` locked.
 5. `python manage.py drill --yes` → file-integrity alert, restore, timings.
-6. Show one finding from your vulnerability register as found → fixed → retested.
+6. Show one finding from the vulnerability register (`docs/VULNERABILITY_REGISTER.md`) as found → fixed → retested.
 
 ## Design decisions worth defending in the viva
 
