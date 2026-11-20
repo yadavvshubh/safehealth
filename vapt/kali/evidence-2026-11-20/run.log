@@ -1,0 +1,9 @@
+=== 2026-11-20 14:00:52 nmap full port scan
+=== 2026-11-20 14:03:48 nmap headers/methods
+=== 2026-11-20 14:03:50 curl headers + cookies
+=== 2026-11-20 14:03:50 sqlmap baseline login (dump users)
+=== 2026-11-20 14:19:10 sqlmap baseline patient search (authenticated; pass the RECEPTIONIST, whose search is the injectable one)
+logged in as ravi: yes
+=== 2026-11-20 14:19:14 sqlmap hardened login (fresh CSRF token per request)
+=== 2026-11-20 14:19:29 nikto
+=== 2026-11-20 14:23:48 hydra baseline (top-100 rockyou + the real password planted at the end)

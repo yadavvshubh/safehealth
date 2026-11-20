@@ -1,0 +1,11 @@
+=== BASELINE (http, no CSRF) ===
+  [control, real user + wrong password] username=<arjun> -> HTTP 401
+  [lone single quote] username=<'> -> HTTP 500
+  [tautology bypass] username=<' OR '1'='1' -- > -> HTTP 302
+=== HARDENED (https, per-request CSRF token) ===
+  [control, real user + wrong password] username=<arjun> -> HTTP 401
+  [lone single quote] username=<'> -> HTTP 401
+  [tautology bypass] username=<' OR '1'='1' -- > -> HTTP 401
+---
+Injectable where a lone quote 500s (SQL broke). 401 for every input = parameterised/safe.
+302 on the tautology = full authentication bypass.

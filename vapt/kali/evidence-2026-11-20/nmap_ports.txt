@@ -1,0 +1,14 @@
+# Nmap 7.98 scan initiated Fri Nov 20 14:00:52 2026 as: /usr/lib/nmap/nmap --privileged -n -Pn -T4 --min-rate 1000 -p- -oN nmap_ports.txt 192.168.56.1
+Nmap scan report for 192.168.56.1
+Host is up (0.0017s latency).
+Not shown: 65529 filtered tcp ports (no-response)
+PORT      STATE SERVICE
+3306/tcp  open  mysql
+5443/tcp  open  spss
+5444/tcp  open  unknown
+7680/tcp  open  pando-pub
+33060/tcp open  mysqlx
+57877/tcp open  unknown
+MAC Address: 0A:00:27:00:00:14 (Unknown)
+
+# Nmap done at Fri Nov 20 14:03:34 2026 -- 1 IP address (1 host up) scanned in 161.90 seconds

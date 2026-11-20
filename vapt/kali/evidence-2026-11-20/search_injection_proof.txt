@@ -1,0 +1,7 @@
+login as ravi: HTTP 302 (302 = success)
+[benign surname] q=<Sharma> -> HTTP 200, body 1460 bytes
+[benign no-match (smallest page)] q=<zzz_no_match> -> HTTP 200, body 1466 bytes
+[single quote (unsafe query 500s here)] q=<'> -> HTTP 500, body 79 bytes
+[tautology (unsafe query returns the full-table page)] q=<' OR '1'='1> -> HTTP 200, body 3853 bytes
+---
+Injectable if the single quote 500s and the tautology page is much larger than the no-match page.

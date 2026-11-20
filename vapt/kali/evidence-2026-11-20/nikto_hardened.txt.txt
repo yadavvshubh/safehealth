@@ -1,0 +1,11 @@
+- Nikto v2.6.0/
++ Target Host: 192.168.56.1
++ Target Port: 5443
++ SSL Info:           Subject:  /CN=SafeHealth lab
+                      CN:       SafeHealth
+                      SAN:      localhost
+                      Ciphers:  TLS_AES_256_GCM_SHA384
+                      Issuer:   /CN=SafeHealth lab
++ HEAD Python/3.12.10 appears to be outdated (current is at least 3.13.1).
++ GET /: Hostname '192.168.56.1' does not match certificate names (CN: SafeHealth, SAN: localhost). See: https://cwe.mitre.org/data/definitions/297.html: 
++ GET /: The X-Content-Type-Options header is not set. This could allow the user agent to render the content of the site in a different fashion to the MIME type. See: https://www.netsparker.com/web-vulnerability-scanner/vulnerabilities/missing-content-type-header/: 

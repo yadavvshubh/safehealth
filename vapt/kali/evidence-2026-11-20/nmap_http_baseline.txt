@@ -1,0 +1,9 @@
+# Nmap 7.98 scan initiated Fri Nov 20 14:03:48 2026 as: /usr/lib/nmap/nmap --privileged -n -Pn --script http-headers,http-methods -p 5444 -oN nmap_http_baseline.txt 192.168.56.1
+Nmap scan report for 192.168.56.1
+Host is up (0.0021s latency).
+
+PORT     STATE SERVICE
+5444/tcp open  unknown
+MAC Address: 0A:00:27:00:00:14 (Unknown)
+
+# Nmap done at Fri Nov 20 14:03:48 2026 -- 1 IP address (1 host up) scanned in 0.53 seconds
