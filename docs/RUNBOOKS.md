@@ -47,9 +47,13 @@ lab instance (synthetic data) and will be larger on a full clinic database.
 
 | Run | Date | Seconds to alert | Restore time | Data-loss window | Targets met? |
 |---|---|---|---|---|---|
-| 1 | 2026-11-16 | 0.008 s | 0.004 s | 0.013 s | Yes (both) |
-| 2 | 2026-11-16 | 0.008 s | 0.003 s | 0.013 s | Yes (both) |
-| 3 | 2026-11-16 | 0.008 s | 0.003 s | 0.014 s | Yes (both) |
+| 1 | 2026-11-21 | 0.434 s | 0.097 s | 0.617 s | Yes (both) |
+| 2 | 2026-11-21 | 0.465 s | 0.055 s | 0.519 s | Yes (both) |
+| 3 | 2026-11-21 | 0.477 s | 0.063 s | 0.525 s | Yes (both) |
+
+Measured on the lab host (Windows 11, Intel i7-12700H), the same machine that serves both
+builds to the Kali VM. Earlier container runs (2026-11-16) gave about 0.008 s to alert and
+0.003 s to restore; the host is slower because of real disk I/O, still far inside the targets.
 
 - **Seconds to alert**: time from the simulated ransomware scrambling the files to the
   High `ransomware_file_integrity` alert being raised. All 30 of 30 files were flagged.
@@ -62,5 +66,4 @@ lab instance (synthetic data) and will be larger on a full clinic database.
   RPO target. Run `python manage.py backup` more often to shrink it.
 - **Audit chain after restore**: verified intact on every run.
 
-Re-run these on the lab VM with `python manage.py drill --yes` and replace the figures
-with your own; the report should use the VM numbers, not these container numbers.
+To repeat: `python manage.py drill --yes` on the lab host.

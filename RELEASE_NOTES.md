@@ -14,12 +14,11 @@ except fixes forced by Kali testing, and record any such fix below.
 - 68/68 live attack checks pass against the HTTPS server (script: vapt/live_attack.py).
 - Baseline vs hardened: 19/19 vulnerable → 0/19 (see vapt/).
 - Security score: 0.3/10 → 9.3/10 (**self-assessed** by the team; the baseline was built to be weak, so treat the Kali results as the independent evidence).
-- Ransomware drill: detect ~0.008 s, restore ~0.003 s, chain intact (see docs/RUNBOOKS.md).
+- Ransomware drill on the lab host: detect ~0.46 s, restore ~0.07 s, 30/30 files flagged, chain intact (see docs/RUNBOOKS.md).
 
 ## Still owned by the team (not code)
 - Kali VAPT screenshots (Nmap, SQLmap, Burp, ZAP) — see docs/KALI_TEST_PLAN.md.
 - Report chapters marked [To add] — literature review and personal analysis.
-- Drill re-run on the lab VM; replace container timings with VM numbers in docs/RUNBOOKS.md.
 
 ## Fixes after freeze (log them here)
 | Date | What Kali found | Fix | Retest |
@@ -63,4 +62,5 @@ Notes: checks F05/F06 in the comparison were answered by the rate limit before t
 live checks cover the lockout). OWASP ZAP is not installed on the Kali VM and the lab is offline,
 so nikto covers the header scan. The full `nmap -p-` sweep was slow because nmap waited on
 reverse DNS; `vapt/kali_run.sh` now passes `-n` and scans every port. The Kali CLI tool logs (nmap,
-sqlmap, nikto, hydra) and the ransomware drill on the lab VM are still to be added.
+sqlmap, nikto, hydra) are still to be added. The ransomware drill was re-run on the lab host on
+2026-11-21 (docs/RUNBOOKS.md).
