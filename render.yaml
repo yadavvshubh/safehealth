@@ -14,5 +14,9 @@ services:
     envVars:
       - key: SAFEHEALTH_TRUST_PROXY
         value: "1"
+      # Public demo: one shared, stable password for every seeded account (synthetic data; MFA still
+      # required at login). Change it in the Render dashboard if you want a different one.
+      - key: SAFEHEALTH_DEMO_PASSWORD
+        value: "SafeHealthDemo2026"
       - key: PYTHON_VERSION
         value: "3.12.7"

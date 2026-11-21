@@ -1,5 +1,6 @@
 """Synthetic demo data (NFR Privacy: no real patient data anywhere). All names are invented."""
 import json
+import os
 import secrets
 import string
 import time
@@ -37,6 +38,13 @@ PATIENTS += [(f"Test Patient Number {chr(65 + i)}", "1990-01-01", "Other", f"+91
 
 
 def _password():
+    # Hosted demo: one fixed, shareable password for every account so it survives the free host's
+    # restarts (which wipe the disk and re-seed). Must still pass the policy. Unset in the lab -> random.
+    fixed = os.environ.get("SAFEHEALTH_DEMO_PASSWORD")
+    if fixed:
+        if passwords.policy_errors(fixed):
+            raise SystemExit("SAFEHEALTH_DEMO_PASSWORD fails the password policy (need 12+ chars, upper, lower, digit).")
+        return fixed
     alphabet = string.ascii_letters + string.digits
     while True:
         candidate = "".join(secrets.choice(alphabet) for _ in range(16))
