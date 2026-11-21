@@ -1,0 +1,18 @@
+# Render Blueprint: hosts the HARDENED SafeHealth build as a public HTTPS demo.
+# Never deploy the deliberately vulnerable baseline this way.
+# Free tier: 512 MB RAM, ephemeral disk (reset on each restart), sleeps after 15 min idle.
+services:
+  - type: web
+    name: safehealth-demo
+    runtime: python
+    plan: free
+    region: oregon
+    buildCommand: pip install -r requirements.txt gunicorn
+    # Ephemeral disk resets on restart, so seed fresh each boot (prints demo passwords to the logs);
+    # 1 worker because the rate limiter keeps its counters in that process's memory.
+    startCommand: python manage.py seed; gunicorn wsgi:app --workers 1 --bind 0.0.0.0:$PORT --timeout 60
+    envVars:
+      - key: SAFEHEALTH_TRUST_PROXY
+        value: "1"
+      - key: PYTHON_VERSION
+        value: "3.12.7"
